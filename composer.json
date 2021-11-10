@@ -1,5 +1,5 @@
 {
-    "name": "your-name-here/ts-export",
+    "name": "kaz29/cakephp-ts-export-plugin",
     "description": "TsExport plugin for CakePHP",
     "type": "cakephp-plugin",
     "license": "MIT",
