@@ -44,6 +44,11 @@ class ExportEntityCommand extends Command
             ->addOption('all', [
                 'help' => 'Export all entities',
                 'boolean' => true,
+            ])
+            ->addOption('suffix', [
+                'help' => 'Interface suffix',
+                'required' => false,
+                'string' => true,
             ]);
 
         return $parser;
@@ -73,6 +78,7 @@ class ExportEntityCommand extends Command
             $tableNames[] = $args->getArgument('table');
         }
 
+        $suffix = $args->getArgument('suffix');
         foreach ($tableNames as $tableName) {
             $table = TableRegistry::getTableLocator()->get($tableName);
             if (get_class($table) === Table::class) {
@@ -82,7 +88,7 @@ class ExportEntityCommand extends Command
 
             $schema = $schemaCollection->describe($table->getTable());
 
-            $this->exportTypescriptType($table, $schema, $io);
+            $this->exportTypescriptType($table, $schema, $suffix, $io);
         }
     }
 
@@ -100,14 +106,14 @@ class ExportEntityCommand extends Command
         return $tableNames;
     }
 
-    protected function exportTypescriptType(Table $table, TableSchemaInterface $schema, ConsoleIo $io): void
+    protected function exportTypescriptType(Table $table, TableSchemaInterface $schema, string|null $suffix, ConsoleIo $io): void
     {
         $entityInfo = explode('\\', $table->getEntityClass());
         $io->out("/**\n * $entityInfo[3] entity interface\n */");
         $io->out('export interface ' . $entityInfo[3] . ' {');
         foreach ($schema->columns() as $name) {
             $io->out(str_repeat(' ', 2) . $this->makeTypeScriptColumn(
-                $name,
+                "$name{$suffix}",
                 $schema->getColumnType($name),
                 $schema->getColumn($name),
                 $schema->isNullable($name)
